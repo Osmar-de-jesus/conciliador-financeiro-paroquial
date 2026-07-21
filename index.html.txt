@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Conciliador Financeiro Paroquial</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header>
+
+            <img src="logo-paroquia.jpg" alt="Logo da Paróquia" class="logo">
+
+            <h1>Conciliador Financeiro Paroquial</h1>
+
+            <p class="subtitulo">
+                Sistema para conferência de recebimentos de maquininhas de cartão
+            </p>
+
+        </header>
+
+        <main>
+
+            <section class="card">
+
+                <h2>📁 Relatório da Maquininha</h2>
+
+                <input
+                    type="file"
+                    id="arquivoMaquininha"
+                    accept=".csv,.xls,.xlsx">
+
+            </section>
+
+            <section class="card">
+
+                <h2>🏦 Extrato Bancário</h2>
+
+                <input
+                    type="file"
+                    id="arquivoBanco"
+                    accept=".csv,.xls,.xlsx">
+
+            </section>
+
+            <div class="acoes">
+
+                <button id="btnLerArquivos">
+                    🔎 Ler Arquivos
+                </button>
+
+                <button id="btnConciliar" disabled>
+                    ✅ Conciliar
+                </button>
+
+            </div>
+
+            <section class="card">
+
+                <h2>Resultado</h2>
+
+                <div id="resultado">
+
+                    <p class="info">
+                        Selecione os dois arquivos para iniciar a leitura.
+                    </p>
+
+                </div>
+
+            </section>
+
+            <section class="card" id="configuracaoColunas" style="display:none;">
+
+                <h2>Configuração das Colunas</h2>
+
+                <p>
+
+                    Caso o sistema não identifique automaticamente as colunas,
+                    selecione manualmente.
+
+                </p>
+
+                <div id="colunasMaquininha"></div>
+
+                <br>
+
+                <div id="colunasBanco"></div>
+
+            </section>
+
+        </main>
+
+        <footer>
+
+            <hr>
+
+            <p>
+
+                <strong>Versão 1.0</strong>
+
+            </p>
+
+            <p>
+
+                Desenvolvido por Osmar de Jesus
+
+            </p>
+
+            <p>
+
+                © 2026
+
+            </p>
+
+        </footer>
+
+    </div>
+
+    <script src="libs/xlsx.full.min.js"></script>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>

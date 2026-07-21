@@ -1,0 +1,334 @@
+/* ==========================================
+   CONCILIADOR FINANCEIRO PAROQUIAL
+   Versão 1.0
+========================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;
+}
+
+body{
+
+    background:#eef2f7;
+
+    color:#333;
+
+}
+
+.container{
+
+    width:95%;
+    max-width:900px;
+
+    margin:30px auto;
+
+    background:white;
+
+    border-radius:15px;
+
+    box-shadow:0 10px 30px rgba(0,0,0,.12);
+
+    overflow:hidden;
+
+}
+
+header{
+
+    background:#1f4e79;
+
+    color:white;
+
+    text-align:center;
+
+    padding:35px;
+
+}
+
+.logo{
+
+    width:120px;
+
+    height:120px;
+
+    object-fit:contain;
+
+    border-radius:50%;
+
+    background:white;
+
+    padding:8px;
+
+    margin-bottom:15px;
+
+}
+
+header h1{
+
+    font-size:34px;
+
+    margin-bottom:10px;
+
+}
+
+.subtitulo{
+
+    font-size:17px;
+
+    opacity:.9;
+
+}
+
+main{
+
+    padding:30px;
+
+}
+
+.card{
+
+    background:#fafafa;
+
+    border:1px solid #ddd;
+
+    border-radius:10px;
+
+    padding:20px;
+
+    margin-bottom:25px;
+
+}
+
+.card h2{
+
+    color:#1f4e79;
+
+    margin-bottom:15px;
+
+}
+
+input[type=file]{
+
+    width:100%;
+
+    padding:14px;
+
+    border:2px dashed #999;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    background:white;
+
+}
+
+input[type=file]:hover{
+
+    border-color:#1f4e79;
+
+}
+
+.acoes{
+
+    display:flex;
+
+    gap:15px;
+
+    margin-bottom:25px;
+
+}
+
+button{
+
+    flex:1;
+
+    border:none;
+
+    border-radius:8px;
+
+    padding:15px;
+
+    font-size:17px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+}
+
+#btnLerArquivos{
+
+    background:#1f4e79;
+
+    color:white;
+
+}
+
+#btnLerArquivos:hover{
+
+    background:#163a59;
+
+}
+
+#btnConciliar{
+
+    background:#2e7d32;
+
+    color:white;
+
+}
+
+#btnConciliar:hover{
+
+    background:#1f5d23;
+
+}
+
+button:disabled{
+
+    background:#bdbdbd;
+
+    cursor:not-allowed;
+
+}
+
+#resultado{
+
+    background:white;
+
+    border:1px solid #ddd;
+
+    border-radius:8px;
+
+    min-height:180px;
+
+    padding:20px;
+
+}
+
+.info{
+
+    color:#666;
+
+}
+
+.sucesso{
+
+    color:#2e7d32;
+
+    font-weight:bold;
+
+}
+
+.erro{
+
+    color:#d32f2f;
+
+    font-weight:bold;
+
+}
+
+.alerta{
+
+    color:#ef6c00;
+
+    font-weight:bold;
+
+}
+
+table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+    margin-top:20px;
+
+}
+
+table th{
+
+    background:#1f4e79;
+
+    color:white;
+
+    padding:12px;
+
+}
+
+table td{
+
+    border:1px solid #ddd;
+
+    padding:10px;
+
+}
+
+table tr:nth-child(even){
+
+    background:#f8f8f8;
+
+}
+
+select{
+
+    width:100%;
+
+    padding:12px;
+
+    border-radius:6px;
+
+    border:1px solid #ccc;
+
+    margin-top:8px;
+
+    margin-bottom:20px;
+
+}
+
+footer{
+
+    text-align:center;
+
+    padding:25px;
+
+    color:#666;
+
+    background:#fafafa;
+
+}
+
+footer hr{
+
+    margin-bottom:20px;
+
+}
+
+@media(max-width:700px){
+
+    .acoes{
+
+        flex-direction:column;
+
+    }
+
+    header h1{
+
+        font-size:27px;
+
+    }
+
+    .logo{
+
+        width:90px;
+
+        height:90px;
+
+    }
+
+}	

@@ -1,0 +1,665 @@
+/* ==========================================
+   CONCILIADOR FINANCEIRO PAROQUIAL
+   Script.js
+   Versão 1.0
+========================================== */
+
+const btnLerArquivos = document.getElementById("btnLerArquivos");
+const btnConciliar = document.getElementById("btnConciliar");
+
+const resultado = document.getElementById("resultado");
+
+let dadosMaquininha = [];
+let dadosBanco = [];
+
+let colunasMaquininha = [];
+let colunasBanco = [];
+
+let configuracao = {
+
+    maq: {},
+
+    banco: {}
+
+};
+
+btnLerArquivos.addEventListener("click", lerArquivos);
+
+btnConciliar.addEventListener("click", conciliar);
+
+async function lerArquivos(){
+
+    resultado.innerHTML="";
+
+    const arquivoMaquininha =
+        document.getElementById("arquivoMaquininha").files[0];
+
+    const arquivoBanco =
+        document.getElementById("arquivoBanco").files[0];
+
+    if(!arquivoMaquininha){
+
+        resultado.innerHTML="<p class='erro'>Selecione o relatório da maquininha.</p>";
+
+        return;
+
+    }
+
+    if(!arquivoBanco){
+
+        resultado.innerHTML="<p class='erro'>Selecione o extrato bancário.</p>";
+
+        return;
+
+    }
+
+    try{
+
+        dadosMaquininha =
+            await carregarPlanilha(arquivoMaquininha);
+
+        dadosBanco =
+            await carregarPlanilha(arquivoBanco);
+
+        colunasMaquininha =
+            Object.keys(dadosMaquininha[0] || {});
+
+        colunasBanco =
+            Object.keys(dadosBanco[0] || {});
+
+        resultado.innerHTML=`
+
+            <p class="sucesso">
+
+                ✔ Arquivos carregados com sucesso.
+
+            </p>
+
+            <br>
+
+            <strong>Maquininha:</strong>
+
+            ${dadosMaquininha.length} registros
+
+            <br><br>
+
+            <strong>Banco:</strong>
+
+            ${dadosBanco.length} registros
+
+            <br><br>
+
+            Identificando colunas...
+
+        `;
+
+        identificarColunas();
+
+    }
+
+    catch(erro){
+
+        console.error(erro);
+
+        resultado.innerHTML="<p class='erro'>Erro ao abrir os arquivos.</p>";
+
+    }
+
+}
+
+function carregarPlanilha(arquivo){
+
+    return new Promise((resolve,reject)=>{
+
+        const leitor=new FileReader();
+
+        leitor.onload=(evento)=>{
+
+            const dados=new Uint8Array(evento.target.result);
+
+            const workbook=XLSX.read(dados,{type:"array"});
+
+            const primeiraAba=workbook.SheetNames[0];
+
+            const planilha=workbook.Sheets[primeiraAba];
+
+            const json=XLSX.utils.sheet_to_json(planilha);
+
+            resolve(json);
+
+        };
+
+        leitor.onerror=reject;
+
+        leitor.readAsArrayBuffer(arquivo);
+
+    });
+
+}/* ==========================================
+   PARTE 2
+   Identificação automática das colunas
+========================================== */
+
+function identificarColunas(){
+
+    configuracao.maq = detectarColunas(colunasMaquininha);
+
+    configuracao.banco = detectarColunas(colunasBanco);
+
+    const faltandoMaq =
+        !configuracao.maq.valor ||
+        !configuracao.maq.data;
+
+    const faltandoBanco =
+        !configuracao.banco.valor ||
+        !configuracao.banco.data;
+
+    if(faltandoMaq || faltandoBanco){
+
+        montarSelecaoManual();
+
+        resultado.innerHTML += `
+
+            <br><br>
+
+            <p class="alerta">
+
+                Algumas colunas não puderam ser identificadas automaticamente.
+
+            </p>
+
+        `;
+
+        return;
+
+    }
+
+    btnConciliar.disabled = false;
+
+    resultado.innerHTML += `
+
+        <br><br>
+
+        <p class="sucesso">
+
+            ✔ Colunas identificadas automaticamente.
+
+        </p>
+
+        <br>
+
+        <strong>Maquininha</strong>
+
+        <br>
+
+        Data: ${configuracao.maq.data}
+
+        <br>
+
+        Valor: ${configuracao.maq.valor}
+
+        <br>
+
+        NSU: ${configuracao.maq.nsu || "Não encontrado"}
+
+        <br><br>
+
+        <strong>Banco</strong>
+
+        <br>
+
+        Data: ${configuracao.banco.data}
+
+        <br>
+
+        Valor: ${configuracao.banco.valor}
+
+    `;
+
+}
+
+function detectarColunas(colunas){
+
+    const retorno={
+
+        data:null,
+
+        valor:null,
+
+        nsu:null
+
+    };
+
+    colunas.forEach(coluna=>{
+
+        const nome=coluna.toLowerCase();
+
+        if(
+
+            nome.includes("valor") ||
+
+            nome.includes("total") ||
+
+            nome.includes("líquido") ||
+
+            nome.includes("liquido") ||
+
+            nome.includes("recebido")
+
+        ){
+
+            retorno.valor=coluna;
+
+        }
+
+        if(
+
+            nome.includes("data") ||
+
+            nome.includes("movimento") ||
+
+            nome.includes("crédito") ||
+
+            nome.includes("credito") ||
+
+            nome.includes("venda")
+
+        ){
+
+            retorno.data=coluna;
+
+        }
+
+        if(
+
+            nome.includes("nsu") ||
+
+            nome.includes("tid") ||
+
+            nome.includes("id") ||
+
+            nome.includes("transação") ||
+
+            nome.includes("transacao")
+
+        ){
+
+            retorno.nsu=coluna;
+
+        }
+
+    });
+
+    return retorno;
+
+}
+
+function montarSelecaoManual(){
+
+    document.getElementById("configuracaoColunas").style.display="block";
+
+    montarSelects(
+        "colunasMaquininha",
+        colunasMaquininha,
+        "maq"
+    );
+
+    montarSelects(
+        "colunasBanco",
+        colunasBanco,
+        "banco"
+    );
+
+}
+
+function montarSelects(id,colunas,tipo){
+
+    const div=document.getElementById(id);
+
+    div.innerHTML="";
+
+    ["data","valor","nsu"].forEach(campo=>{
+
+        const label=document.createElement("label");
+
+        label.innerHTML="<strong>"+campo.toUpperCase()+"</strong>";
+
+        const select=document.createElement("select");
+
+        select.id=tipo+"_"+campo;
+
+        const vazio=document.createElement("option");
+
+        vazio.value="";
+
+        vazio.text="Selecione...";
+
+        select.appendChild(vazio);
+
+        colunas.forEach(coluna=>{
+
+            const op=document.createElement("option");
+
+            op.value=coluna;
+
+            op.text=coluna;
+
+            select.appendChild(op);
+
+        });
+
+        div.appendChild(label);
+
+        div.appendChild(select);
+
+        div.appendChild(document.createElement("br"));
+
+    });
+
+    const botao=document.createElement("button");
+
+    botao.innerHTML="Salvar Configuração";
+
+    botao.onclick=function(){
+
+        salvarConfiguracao();
+
+    };
+
+    div.appendChild(botao);
+
+}
+
+function salvarConfiguracao(){
+
+    configuracao.maq.data =
+        document.getElementById("maq_data").value;
+
+    configuracao.maq.valor =
+        document.getElementById("maq_valor").value;
+
+    configuracao.maq.nsu =
+        document.getElementById("maq_nsu").value;
+
+    configuracao.banco.data =
+        document.getElementById("banco_data").value;
+
+    configuracao.banco.valor =
+        document.getElementById("banco_valor").value;
+
+    configuracao.banco.nsu =
+        document.getElementById("banco_nsu").value;
+
+    btnConciliar.disabled=false;
+
+    resultado.innerHTML += `
+
+        <br><br>
+
+        <p class="sucesso">
+
+            ✔ Configuração salva.
+
+        </p>
+
+    `;/* ==========================================
+   PARTE 3
+   Conciliação Financeira (MVP)
+========================================== */
+
+function conciliar(){
+
+    resultado.innerHTML="";
+
+    let totalMaquininha=0;
+    let totalBanco=0;
+
+    let conciliadas=0;
+
+    let pendentes=[];
+
+    const valoresBanco=[];
+
+    dadosBanco.forEach(item=>{
+
+        const valor=converterValor(
+            item[configuracao.banco.valor]
+        );
+
+        valoresBanco.push(valor);
+
+        totalBanco+=valor;
+
+    });
+
+    dadosMaquininha.forEach(item=>{
+
+        const valor=converterValor(
+            item[configuracao.maq.valor]
+        );
+
+        totalMaquininha+=valor;
+
+        const indice=valoresBanco.findIndex(v=>
+
+            Math.abs(v-valor)<0.01
+
+        );
+
+        if(indice>=0){
+
+            conciliadas++;
+
+            valoresBanco.splice(indice,1);
+
+        }
+
+        else{
+
+            pendentes.push({
+
+                data:item[configuracao.maq.data] || "-",
+
+                valor:valor,
+
+                nsu:
+
+                configuracao.maq.nsu
+
+                ?
+
+                item[configuracao.maq.nsu]
+
+                :
+
+                "-"
+
+            });
+
+        }
+
+    });
+
+    let html="";
+
+    html+=`
+
+    <h2>Resultado da Conciliação</h2>
+
+    <hr>
+
+    <p>
+
+    <strong>Registros Maquininha:</strong>
+
+    ${dadosMaquininha.length}
+
+    </p>
+
+    <p>
+
+    <strong>Registros Banco:</strong>
+
+    ${dadosBanco.length}
+
+    </p>
+
+    <p>
+
+    <strong>Conciliadas:</strong>
+
+    ${conciliadas}
+
+    </p>
+
+    <p>
+
+    <strong>Pendentes:</strong>
+
+    ${pendentes.length}
+
+    </p>
+
+    <hr>
+
+    <p>
+
+    <strong>Total Maquininha:</strong>
+
+    ${formatarMoeda(totalMaquininha)}
+
+    </p>
+
+    <p>
+
+    <strong>Total Banco:</strong>
+
+    ${formatarMoeda(totalBanco)}
+
+    </p>
+
+    <p>
+
+    <strong>Diferença:</strong>
+
+    ${formatarMoeda(totalMaquininha-totalBanco)}
+
+    </p>
+
+    `;
+
+    if(pendentes.length>0){
+
+        html+=`
+
+        <h3>Transações Pendentes</h3>
+
+        <table>
+
+        <thead>
+
+        <tr>
+
+        <th>Data</th>
+
+        <th>Valor</th>
+
+        <th>NSU</th>
+
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        `;
+
+        pendentes.forEach(item=>{
+
+            html+=`
+
+            <tr>
+
+            <td>${item.data}</td>
+
+            <td>${formatarMoeda(item.valor)}</td>
+
+            <td>${item.nsu}</td>
+
+            </tr>
+
+            `;
+
+        });
+
+        html+=`
+
+        </tbody>
+
+        </table>
+
+        `;
+
+    }
+
+    else{
+
+        html+=`
+
+        <div class="sucesso">
+
+        ✔ Todas as transações foram conciliadas.
+
+        </div>
+
+        `;
+
+    }
+
+    resultado.innerHTML=html;
+
+}
+
+function converterValor(valor){
+
+    if(valor===undefined || valor===null)
+
+        return 0;
+
+    if(typeof valor==="number")
+
+        return valor;
+
+    valor=String(valor);
+
+    valor=valor.replace("R$","");
+
+    valor=valor.replace(/\./g,"");
+
+    valor=valor.replace(",", ".");
+
+    valor=valor.trim();
+
+    const numero=parseFloat(valor);
+
+    return isNaN(numero)?0:numero;
+
+}
+
+function formatarMoeda(valor){
+
+    return Number(valor).toLocaleString(
+
+        "pt-BR",
+
+        {
+
+            style:"currency",
+
+            currency:"BRL"
+
+        }
+
+    );
+
+}
